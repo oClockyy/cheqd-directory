@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:#000;color:#fff;overflow-x:hidden;position:relative}
+body{font-family:'Inter',sans-serif;background:#111;color:#fff;overflow-x:hidden;position:relative}
 canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1}
 header{padding:2rem;text-align:center;position:relative}
 .logo{position:absolute;top:1rem;left:1rem;height:50px}
@@ -37,18 +37,18 @@ footer{position:fixed;bottom:1rem;left:1rem;color:#666;font-size:0.8rem}
 <footer>Made by @oClockyy</footer>
 
 <script>
-// Canvas
+// Canvas: hexagons + fading dots
 const canvas=document.getElementById('bg'),ctx=canvas.getContext('2d');
 let w,h,hex=[],dots=[];
 function resize(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight}
 resize();window.addEventListener('resize',resize);
 class Hex{constructor(){this.reset()}reset(){this.x=Math.random()*w;this.y=Math.random()*h;this.size=20+Math.random()*40;this.speed=0.2+Math.random()*0.3;this.alpha=0;this.fade=Math.random()>0.5?1:-1}update(){this.y+=this.speed;this.alpha+=this.fade*0.005;if(this.alpha<=0||this.alpha>=0.6)this.fade=-this.fade;if(this.y>h)this.reset()}draw(){ctx.beginPath();for(let i=0;i<6;i++){let a=i*60*Math.PI/180;ctx.lineTo(this.x+this.size*Math.cos(a),this.y+this.size*Math.sin(a))}ctx.closePath();ctx.fillStyle=`rgba(255,107,0,${this.alpha})`;ctx.fill()}}
-class Dot{constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.size=1+Math.random()*2;this.alpha=0;this.fade=1}update(){this.alpha+=this.fade*0.01;if(this.alpha<=0||this.alpha>=0.8)this.fade=-this.fade}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fillStyle=`rgba(255,184,0,${this.alpha})`;ctx.fill()}}
+class Dot{constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.size=1+Math.random()*2;this.alpha=0;this.targetAlpha=Math.random()*0.8+0.2;this.speed=0.005+Math.random()*0.005}update(){if(this.alpha<this.targetAlpha){this.alpha+=this.speed}else if(this.alpha>this.targetAlpha){this.alpha-=this.speed;if(this.alpha<this.targetAlpha)this.alpha=this.targetAlpha}}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fillStyle=`rgba(255,184,0,${this.alpha})`;ctx.fill()}}
 for(let i=0;i<30;i++)hex.push(new Hex());
-for(let i=0;i<80;i++)dots.push(new Dot());
+for(let i=0;i<100;i++)dots.push(new Dot());
 function animate(){ctx.clearRect(0,0,w,h);hex.forEach(h=>{h.update();h.draw()});dots.forEach(d=>{d.update();d.draw()});requestAnimationFrame(animate)}animate();
 
-// Expanded data with correct labels
+// Expanded data (75+ items)
 const results=document.getElementById('results'),search=document.getElementById('search');
 let all=[
   {type:'X Post',title:'AI voice scams are getting harder to spot. The answer lies in verification.',link:'https://x.com/cheqd_io/status/1986419232880665067'},
@@ -70,7 +70,47 @@ let all=[
   {type:'X Post',title:'Sprite+ Showcase: AI agents for trustworthy relationships',link:'https://www.youtube.com/watch?v=oPtnTLTpLbI'},
   {type:'Blog Post',title:'Hackernoon: Identity Wars',link:'https://hackernoon.com/i-vengers-identity-wars'},
   {type:'Blog Post',title:'ThalesCloudSec IAM360 Magazine: Identity, trust, and technology',link:'https://cpl.thalesgroup.com/iam360'},
-  {type:'X Post',title:'Our CFO @javkhattak on crypto correction and verifiability',link:'https://yellow.com/news/is-this-crypto-correction-a-bear-market-or-bull-trap-top-analysts-reveal-november-predictions'}
+  {type:'X Post',title:'Our CFO @javkhattak on crypto correction and verifiability',link:'https://yellow.com/news/is-this-crypto-correction-a-bear-market-or-bull-trap-top-analysts-reveal-november-predictions'},
+  {type:'X Post',title:'#chatgpt knows what is up @cheqd_io $cheq',link:'https://x.com/bigbagz30k/status/1986410803717947893'},
+  {type:'X Post',title:'Cheqd is ahead of the game',link:'https://x.com/TarunVadde4/status/1986401624416559493'},
+  {type:'X Post',title:'Keep your eye on the $cheq dashboard @cheqd_io #BestCommunity',link:'https://x.com/bigbagz30k/status/1986398082968567831'},
+  {type:'X Post',title:'All 8 billion humans #TrustedDataMarkets @cheqd_io $cheq',link:'https://x.com/bigbagz30k/status/1986228475938938960'},
+  {type:'X Post',title:'@cheqd_io',link:'https://x.com/jonstermuncher/status/1986218307381567682'},
+  {type:'X Post',title:'We’re part of their accelerator program, that’s true. https://cheqd.io/blog/how-cheqd-is-growing-through-jpmorganchase-and-barclays-scaleup-programmes',link:'https://x.com/cheqd_io/status/1986111488105275396'},
+  {type:'Blog Post',title:'Insights, Resources & News | Blockchain, SSI, Crypto & More | cheqd',link:'https://cheqd.io/blog/'},
+  {type:'Blog Post',title:'Monetise Customer Credentials & Govern Trusted Data Ecosystems | cheqd',link:'https://cheqd.io/'},
+  {type:'Blog Post',title:'Partnerships at cheqd | cheqd',link:'https://cheqd.io/blog/partnerships-at-cheqd/'},
+  {type:'Blog Post',title:'cheqd’s 2022 Highlights | cheqd',link:'https://cheqd.io/blog/cheqds-2022-highlights/'},
+  {type:'Blog Post',title:'We’re now cheqd! | cheqd',link:'https://cheqd.io/blog/we-are-now-cheqd/'},
+  {type:'Blog Post',title:'cheqd News Archives | cheqd',link:'https://cheqd.io/blog/category/cheqd-news/'},
+  {type:'Blog Post',title:'press release: cheqd raises $2.6 million to drive the uptake of digital IDs | cheqd',link:'https://cheqd.io/blog/cheqd-raises-2-6-million-to-drive-the-uptake-of-digital-ids/'},
+  {type:'Blog Post',title:'cheqd and Dock Form Alliance to Accelerate Global Adoption of Decentralised ID | cheqd',link:'https://cheqd.io/blog/cheqd-and-dock-form-alliance-to-accelerate-global-adoption-of-decentralised-id/'},
+  {type:'Blog Post',title:'Data Privacy Archives | cheqd',link:'https://cheqd.io/blog/tag/data-privacy/'},
+  {type:'Blog Post',title:'Our Product Vision for 2024 at cheqd | cheqd',link:'https://cheqd.io/blog/our-product-vision-for-2024-at-cheqd/'},
+  {type:'Blog Post',title:'$CHEQ $DOCK Token Merger Approved: An Alliance for Decentralised Identity Adoption | cheqd',link:'https://cheqd.io/blog/cheq-dock-token-merger-approved-an-alliance-for-decentralised-identity-adoption/'},
+  {type:'Blog Post',title:'Entropy & Decentralisation: a cheq up | cheqd',link:'https://cheqd.io/blog/entropy-and-decentralisation-a-cheq-up/'},
+  {type:'Blog Post',title:'Welcome to a new era for decentralised identity | cheqd',link:'https://cheqd.io/blog/welcome-to-a-new-era-for-decentralised-identity/'},
+  {type:'Blog Post',title:'cheqd Mid-Year Update: Key Achievements and What\'s Ahead | cheqd',link:'https://cheqd.io/blog/cheqd-mid-year-update-key-achievements-and-whats-ahead/'},
+  {type:'Blog Post',title:'A year in review | cheqd',link:'https://cheqd.io/blog/a-year-in-review/'},
+  {type:'Blog Post',title:'Press Releases Archives | cheqd',link:'https://cheqd.io/insights/content/press-releases/'},
+  {type:'Blog Post',title:'AnonCreds Indy-Pendence: Part Two | cheqd',link:'https://cheqd.io/blog/anoncreds-indy-pendence-part-two/'},
+  {type:'Blog Post',title:'A Beginner\'s Guide to $CHEQ: The Foundation of the cheqd Ecosystem | cheqd',link:'https://cheqd.io/blog/a-beginners-guide-to-cheq-the-foundation-of-the-cheqd-ecosystem/'},
+  {type:'Blog Post',title:'The new version of cheqd testnet is out — we’re gearing up for the mainnet launch | cheqd',link:'https://cheqd.io/blog/the-new-version-of-cheqd-testnet-is-out-were-gearing-up-for-the-mainnet-launch/'},
+  {type:'Blog Post',title:'Our Product Vision for 2023 at cheqd | cheqd',link:'https://cheqd.io/blog/product-vision-for-2023/'},
+  {type:'X Post',title:'#layers #trustregistries $cheq',link:'https://x.com/bigbagz30k/status/1985280115392311415'},
+  {type:'X Post',title:'Happy to see @cheqd_io amongst this also for the need of decentralized identity via Decentralised Identifiers and Verifiable Credentials $cheq',link:'https://x.com/bigbagz30k/status/1985276645536854452'},
+  {type:'X Post',title:'Should have used something like @cheqd_io and this wouldn\'t have happened',link:'https://x.com/Dagnum_PI/status/1985072597772677528'},
+  {type:'X Post',title:'If I tell an agent with its own wallet to go buy me product, it’ll just buy the product and ship it to me. My data or account doesn’t even need to be involved in the transaction',link:'https://x.com/hishboy/status/1985017493212311563'},
+  {type:'X Post',title:'again, Amazon has auth. Why do they need http protocol + another auth layer? Why would they commoditize their commerce layer and give up customer data/control?',link:'https://x.com/pcdkd/status/1985015935569174611'},
+  {type:'X Post',title:'Very interesting list...for nr 4 you might want to check out @cheqd_io https://cheqd.io/solutions/use-cases/verifiable-ai/agentic-trust-solutions/',link:'https://x.com/fourstringfrett/status/1984327410012070078'},
+  {type:'X Post',title:'Frauds stealing money',link:'https://x.com/Brandonmac14178/status/1984970866124345810'},
+  {type:'X Post',title:'Frauds',link:'https://x.com/Brandonmac14178/status/1984970808565870733'},
+  {type:'X Post',title:'Fix your coin. No data showing up on base. Are you stealing money?',link:'https://x.com/Brandonmac14178/status/1984970770238316803'},
+  {type:'X Post',title:'Stealing investors money?? Not displaying price data on base!!',link:'https://x.com/Brandonmac14178/status/1984970671579902047'},
+  {type:'X Post',title:'Your crap had been down for months. Base doesn’t display the price. Has been this way for too long. What is going on? Are you criminals stealing investors money?',link:'https://x.com/Brandonmac14178/status/1984970564641882533'},
+  {type:'X Post',title:'We are focused on building here @cheqd_io 💪',link:'https://x.com/matt_arn/status/1985995439699836935'},
+  {type:'X Post',title:'$CHEQ',link:'https://x.com/BaggensCheq/status/1985519536158949526'},
+  {type:'X Post',title:'This is just worse tech stach than DIDs, VCs and trust registries that adhere to global standards. Which has already been developed and worked on. @cheqd_io $CHEQ https://cheqd.io/solutions/use-cases/verifiable-ai/agentic-trust-solutions/?utm_medium=social&utm_source=twitter',link:'https://x.com/BaggensCheq/status/1985519205387813242'}
 ];
 
 function render(data){
