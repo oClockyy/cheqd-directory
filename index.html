@@ -15,14 +15,20 @@ h1{font-size:2.5rem;background:linear-gradient(90deg,#ff6b00,#ffb800);background
 .note{font-size:0.9rem;color:#aaa;margin:0.5rem 0 1rem}
 input{margin:1rem auto;display:block;width:90%;max-width:500px;padding:1rem;border-radius:12px;border:none;background:rgba(255,255,255,0.1);backdrop-filter:blur(12px);color:#fff;font-size:1rem}
 input::placeholder{color:#aaa}
-.container{max-width:1200px;margin:auto;padding:0 1rem;display:grid;gap:1.5rem;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.container{max-width:1200px;margin:auto;padding:0 1rem}
+.section{margin-bottom:2rem}
+.section-header{cursor:pointer;background:rgba(255,255,255,0.1);backdrop-filter:blur(12px);padding:1rem;border-radius:12px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,107,0,0.3)}
+.section-header h3{color:#ffb800}
+.arrow{font-size:1.5rem;transition:transform .3s}
+.arrow.open{transform:rotate(90deg)}
+.cards{display:none;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-top:1rem}
+.cards.open{display:grid}
 .card{background:rgba(255,255,255,0.08);backdrop-filter:blur(12px);border-radius:16px;padding:1.5rem;border:1px solid rgba(255,107,0,0.3);box-shadow:0 4px 20px rgba(255,107,0,0.1);transition:transform .2s}
 .card:hover{transform:translateY(-4px)}
-.card h3{color:#ffb800;margin-bottom:.5rem}
+.card h4{color:#ffb800;margin-bottom:.5rem}
 .card a{color:#ff6b00;text-decoration:none}
 .card a:hover{text-decoration:underline}
 footer{position:fixed;bottom:1rem;left:1rem;color:#666;font-size:0.8rem}
-.loading{text-align:center;color:#aaa;margin:2rem}
 </style>
 </head>
 <body>
@@ -30,10 +36,10 @@ footer{position:fixed;bottom:1rem;left:1rem;color:#666;font-size:0.8rem}
 <header>
 <img src="logo.png" alt="Custom Logo" class="logo">
 <h1>Cheqd Info Directory</h1>
-<p class="note">Type keywords like "AI" to find cheqd news, posts, and updates instantly.</p>
+<p class="note">Type keywords to search all categories.</p>
 <input type="search" id="search" placeholder="Search cheqd, partners, $CHEQ...">
 </header>
-<div class="container" id="results"><p class="loading">Loading...</p></div>
+<div class="container" id="results"></div>
 <footer>Made by @oClockyy</footer>
 
 <script>
@@ -48,79 +54,110 @@ for(let i=0;i<30;i++)hex.push(new Hex());
 for(let i=0;i<100;i++)dots.push(new Dot());
 function animate(){ctx.clearRect(0,0,w,h);hex.forEach(h=>{h.update();h.draw()});dots.forEach(d=>{d.update();d.draw()});requestAnimationFrame(animate)}animate();
 
-// Expanded data (75+ items)
-const results=document.getElementById('results'),search=document.getElementById('search');
-let all=[
-  {type:'X Post',title:'AI voice scams are getting harder to spot. The answer lies in verification.',link:'https://x.com/cheqd_io/status/1986419232880665067'},
-  {type:'Blog Post',title:'How Organisations Can Create Responsible AI Agents with cheqd',link:'https://cheqd.io/blog/how-organisations-can-create-responsible-ai-agents-with-cheqd/'},
-  {type:'X Post',title:'Is This Crypto Correction a Bear Market or Bull Trap?',link:'https://yellow.com/news/is-this-crypto-correction-a-bear-market-or-bull-trap-top-analysts-reveal-november-predictions'},
-  {type:'X Post',title:'one nerdy coin is @cheqd_io self sovereign identity/verifying AI.',link:'https://x.com/cheqd_io/status/1986033423774064889'},
-  {type:'X Post',title:'We’re preparing for a testnet minor release upgrade (v4.1.6).',link:'https://forum.cheqd.io/discussion/1311804-software-upgrade-proposal-rolling-out-v416'},
-  {type:'X Post',title:'Who can you trust online? In decentralised identity, Trust Registries act like a digital “Who’s Who” guidebook.',link:'https://x.com/cheqd_io/status/1985708616343830793'},
-  {type:'Blog Post',title:'AI is powering the agentic, content, and IP economy. But without verifiable trust, misinformation and IP theft run wild.',link:'https://cheqd.io/solutions/use-cases/verifiable-ai/'},
-  {type:'Blog Post',title:'Jp Morgan is incubating $cheq @cheqd_io',link:'https://cheqd.io/blog/how-cheqd-is-growing-through-jpmorganchase-and-barclays-scaleup-programmes'},
-  {type:'X Post',title:'Internet Identity Workshop Fall cheqd is a proud sponsor.',link:'https://x.com/cheqd_io/status/1984253169703206950'},
-  {type:'Blog Post',title:'Success Story: PlatformD and cheqd Integration',link:'https://cheqd.io/blog/success-story-platformd-and-cheqd-integration/'},
-  {type:'Blog Post',title:'cheqd Quarterly Product Update (Q3)',link:'https://cheqd.io/blog/cheqd-quarterly-product-update-q3/'},
-  {type:'Blog Post',title:'Success Story: Hovi and cheqd Integration',link:'https://cheqd.io/blog/success-story-hovi-and-cheqd-integration/'},
-  {type:'X Post',title:'cheqd Ecosystem: SDK capabilities',link:'https://x.com/cheqd_io/status/1985376673752084541'},
-  {type:'Blog Post',title:'Deloitte\'s latest report on semi-liquid funds cites cheqd',link:'https://www.deloitte.com/us/en/insights/industry/financial-services/semi-liquid-funds.html'},
-  {type:'X Post',title:'End-of-month AMA with @aeonix_network',link:'https://twitter.com/i/spaces/1YpKkkoYaXrKj/peek'},
-  {type:'X Post',title:'Agentic AI Space with @wenaltseason',link:'https://twitter.com/i/spaces/1OyKAjOrZQMGb/peek'},
-  {type:'X Post',title:'Sprite+ Showcase: AI agents for trustworthy relationships',link:'https://www.youtube.com/watch?v=oPtnTLTpLbI'},
-  {type:'Blog Post',title:'Hackernoon: Identity Wars',link:'https://hackernoon.com/i-vengers-identity-wars'},
-  {type:'Blog Post',title:'ThalesCloudSec IAM360 Magazine: Identity, trust, and technology',link:'https://cpl.thalesgroup.com/iam360'},
-  {type:'X Post',title:'Our CFO @javkhattak on crypto correction and verifiability',link:'https://yellow.com/news/is-this-crypto-correction-a-bear-market-or-bull-trap-top-analysts-reveal-november-predictions'},
-  {type:'X Post',title:'#chatgpt knows what is up @cheqd_io $cheq',link:'https://x.com/bigbagz30k/status/1986410803717947893'},
-  {type:'X Post',title:'Cheqd is ahead of the game',link:'https://x.com/TarunVadde4/status/1986401624416559493'},
-  {type:'X Post',title:'Keep your eye on the $cheq dashboard @cheqd_io #BestCommunity',link:'https://x.com/bigbagz30k/status/1986398082968567831'},
-  {type:'X Post',title:'All 8 billion humans #TrustedDataMarkets @cheqd_io $cheq',link:'https://x.com/bigbagz30k/status/1986228475938938960'},
-  {type:'X Post',title:'@cheqd_io',link:'https://x.com/jonstermuncher/status/1986218307381567682'},
-  {type:'X Post',title:'We’re part of their accelerator program, that’s true. https://cheqd.io/blog/how-cheqd-is-growing-through-jpmorganchase-and-barclays-scaleup-programmes',link:'https://x.com/cheqd_io/status/1986111488105275396'},
-  {type:'Blog Post',title:'Insights, Resources & News | Blockchain, SSI, Crypto & More | cheqd',link:'https://cheqd.io/blog/'},
-  {type:'Blog Post',title:'Monetise Customer Credentials & Govern Trusted Data Ecosystems | cheqd',link:'https://cheqd.io/'},
-  {type:'Blog Post',title:'Partnerships at cheqd | cheqd',link:'https://cheqd.io/blog/partnerships-at-cheqd/'},
-  {type:'Blog Post',title:'cheqd’s 2022 Highlights | cheqd',link:'https://cheqd.io/blog/cheqds-2022-highlights/'},
-  {type:'Blog Post',title:'We’re now cheqd! | cheqd',link:'https://cheqd.io/blog/we-are-now-cheqd/'},
-  {type:'Blog Post',title:'cheqd News Archives | cheqd',link:'https://cheqd.io/blog/category/cheqd-news/'},
-  {type:'Blog Post',title:'press release: cheqd raises $2.6 million to drive the uptake of digital IDs | cheqd',link:'https://cheqd.io/blog/cheqd-raises-2-6-million-to-drive-the-uptake-of-digital-ids/'},
-  {type:'Blog Post',title:'cheqd and Dock Form Alliance to Accelerate Global Adoption of Decentralised ID | cheqd',link:'https://cheqd.io/blog/cheqd-and-dock-form-alliance-to-accelerate-global-adoption-of-decentralised-id/'},
-  {type:'Blog Post',title:'Data Privacy Archives | cheqd',link:'https://cheqd.io/blog/tag/data-privacy/'},
-  {type:'Blog Post',title:'Our Product Vision for 2024 at cheqd | cheqd',link:'https://cheqd.io/blog/our-product-vision-for-2024-at-cheqd/'},
-  {type:'Blog Post',title:'$CHEQ $DOCK Token Merger Approved: An Alliance for Decentralised Identity Adoption | cheqd',link:'https://cheqd.io/blog/cheq-dock-token-merger-approved-an-alliance-for-decentralised-identity-adoption/'},
-  {type:'Blog Post',title:'Entropy & Decentralisation: a cheq up | cheqd',link:'https://cheqd.io/blog/entropy-and-decentralisation-a-cheq-up/'},
-  {type:'Blog Post',title:'Welcome to a new era for decentralised identity | cheqd',link:'https://cheqd.io/blog/welcome-to-a-new-era-for-decentralised-identity/'},
-  {type:'Blog Post',title:'cheqd Mid-Year Update: Key Achievements and What\'s Ahead | cheqd',link:'https://cheqd.io/blog/cheqd-mid-year-update-key-achievements-and-whats-ahead/'},
-  {type:'Blog Post',title:'A year in review | cheqd',link:'https://cheqd.io/blog/a-year-in-review/'},
-  {type:'Blog Post',title:'Press Releases Archives | cheqd',link:'https://cheqd.io/insights/content/press-releases/'},
-  {type:'Blog Post',title:'AnonCreds Indy-Pendence: Part Two | cheqd',link:'https://cheqd.io/blog/anoncreds-indy-pendence-part-two/'},
-  {type:'Blog Post',title:'A Beginner\'s Guide to $CHEQ: The Foundation of the cheqd Ecosystem | cheqd',link:'https://cheqd.io/blog/a-beginners-guide-to-cheq-the-foundation-of-the-cheqd-ecosystem/'},
-  {type:'Blog Post',title:'The new version of cheqd testnet is out — we’re gearing up for the mainnet launch | cheqd',link:'https://cheqd.io/blog/the-new-version-of-cheqd-testnet-is-out-were-gearing-up-for-the-mainnet-launch/'},
-  {type:'Blog Post',title:'Our Product Vision for 2023 at cheqd | cheqd',link:'https://cheqd.io/blog/product-vision-for-2023/'},
-  {type:'X Post',title:'#layers #trustregistries $cheq',link:'https://x.com/bigbagz30k/status/1985280115392311415'},
-  {type:'X Post',title:'Happy to see @cheqd_io amongst this also for the need of decentralized identity via Decentralised Identifiers and Verifiable Credentials $cheq',link:'https://x.com/bigbagz30k/status/1985276645536854452'},
-  {type:'X Post',title:'Should have used something like @cheqd_io and this wouldn\'t have happened',link:'https://x.com/Dagnum_PI/status/1985072597772677528'},
-  {type:'X Post',title:'If I tell an agent with its own wallet to go buy me product, it’ll just buy the product and ship it to me. My data or account doesn’t even need to be involved in the transaction',link:'https://x.com/hishboy/status/1985017493212311563'},
-  {type:'X Post',title:'again, Amazon has auth. Why do they need http protocol + another auth layer? Why would they commoditize their commerce layer and give up customer data/control?',link:'https://x.com/pcdkd/status/1985015935569174611'},
-  {type:'X Post',title:'Very interesting list...for nr 4 you might want to check out @cheqd_io https://cheqd.io/solutions/use-cases/verifiable-ai/agentic-trust-solutions/',link:'https://x.com/fourstringfrett/status/1984327410012070078'},
-  {type:'X Post',title:'Frauds stealing money',link:'https://x.com/Brandonmac14178/status/1984970866124345810'},
-  {type:'X Post',title:'Frauds',link:'https://x.com/Brandonmac14178/status/1984970808565870733'},
-  {type:'X Post',title:'Fix your coin. No data showing up on base. Are you stealing money?',link:'https://x.com/Brandonmac14178/status/1984970770238316803'},
-  {type:'X Post',title:'Stealing investors money?? Not displaying price data on base!!',link:'https://x.com/Brandonmac14178/status/1984970671579902047'},
-  {type:'X Post',title:'Your crap had been down for months. Base doesn’t display the price. Has been this way for too long. What is going on? Are you criminals stealing investors money?',link:'https://x.com/Brandonmac14178/status/1984970564641882533'},
-  {type:'X Post',title:'We are focused on building here @cheqd_io 💪',link:'https://x.com/matt_arn/status/1985995439699836935'},
-  {type:'X Post',title:'$CHEQ',link:'https://x.com/BaggensCheq/status/1985519536158949526'},
-  {type:'X Post',title:'This is just worse tech stach than DIDs, VCs and trust registries that adhere to global standards. Which has already been developed and worked on. @cheqd_io $CHEQ https://cheqd.io/solutions/use-cases/verifiable-ai/agentic-trust-solutions/?utm_medium=social&utm_source=twitter',link:'https://x.com/BaggensCheq/status/1985519205387813242'}
+// Full data
+let all = [
+  {title:'AI voice scams are getting harder to spot. The answer lies in verification.',link:'https://x.com/cheqd_io/status/1986419232880665067'},
+  {title:'How Organisations Can Create Responsible AI Agents with cheqd',link:'https://cheqd.io/blog/how-organisations-can-create-responsible-ai-agents-with-cheqd/'},
+  {title:'Is This Crypto Correction a Bear Market or Bull Trap?',link:'https://yellow.com/news/is-this-crypto-correction-a-bear-market-or-bull-trap-top-analysts-reveal-november-predictions'},
+  {title:'one nerdy coin is @cheqd_io self sovereign identity/verifying AI.',link:'https://x.com/cheqd_io/status/1986033423774064889'},
+  {title:'We’re preparing for a testnet minor release upgrade (v4.1.6).',link:'https://forum.cheqd.io/discussion/1311804-software-upgrade-proposal-rolling-out-v416'},
+  {title:'Who can you trust online? In decentralised identity, Trust Registries act like a digital “Who’s Who” guidebook.',link:'https://x.com/cheqd_io/status/1985708616343830793'},
+  {title:'AI is powering the agentic, content, and IP economy. But without verifiable trust, misinformation and IP theft run wild.',link:'https://cheqd.io/solutions/use-cases/verifiable-ai/'},
+  {title:'Jp Morgan is incubating $cheq @cheqd_io',link:'https://cheqd.io/blog/how-cheqd-is-growing-through-jpmorganchase-and-barclays-scaleup-programmes'},
+  {title:'Internet Identity Workshop Fall cheqd is a proud sponsor.',link:'https://x.com/cheqd_io/status/1984253169703206950'},
+  {title:'Success Story: PlatformD and cheqd Integration',link:'https://cheqd.io/blog/success-story-platformd-and-cheqd-integration/'},
+  {title:'cheqd Quarterly Product Update (Q3)',link:'https://cheqd.io/blog/cheqd-quarterly-product-update-q3/'},
+  {title:'Success Story: Hovi and cheqd Integration',link:'https://cheqd.io/blog/success-story-hovi-and-cheqd-integration/'},
+  {title:'cheqd Ecosystem: SDK capabilities',link:'https://x.com/cheqd_io/status/1985376673752084541'},
+  {title:'Deloitte\'s latest report on semi-liquid funds cites cheqd',link:'https://www.deloitte.com/us/en/insights/industry/financial-services/semi-liquid-funds.html'},
+  {title:'End-of-month AMA with @aeonix_network',link:'https://twitter.com/i/spaces/1YpKkkoYaXrKj/peek'},
+  {title:'Agentic AI Space with @wenaltseason',link:'https://twitter.com/i/spaces/1OyKAjOrZQMGb/peek'},
+  {title:'Sprite+ Showcase: AI agents for trustworthy relationships',link:'https://www.youtube.com/watch?v=oPtnTLTpLbI'},
+  {title:'Hackernoon: Identity Wars',link:'https://hackernoon.com/i-vengers-identity-wars'},
+  {title:'ThalesCloudSec IAM360 Magazine: Identity, trust, and technology',link:'https://cpl.thalesgroup.com/iam360'},
+  {title:'Our CFO @javkhattak on crypto correction and verifiability',link:'https://yellow.com/news/is-this-crypto-correction-a-bear-market-or-bull-trap-top-analysts-reveal-november-predictions'},
+  {title:'#chatgpt knows what is up @cheqd_io $cheq',link:'https://x.com/bigbagz30k/status/1986410803717947893'},
+  {title:'Cheqd is ahead of the game',link:'https://x.com/TarunVadde4/status/1986401624416559493'},
+  {title:'Keep your eye on the $cheq dashboard @cheqd_io #BestCommunity',link:'https://x.com/bigbagz30k/status/1986398082968567831'},
+  {title:'All 8 billion humans #TrustedDataMarkets @cheqd_io $cheq',link:'https://x.com/bigbagz30k/status/1986228475938938960'},
+  {title:'@cheqd_io',link:'https://x.com/jonstermuncher/status/1986218307381567682'},
+  {title:'We’re part of their accelerator program, that’s true. https://cheqd.io/blog/how-cheqd-is-growing-through-jpmorganchase-and-barclays-scaleup-programmes',link:'https://x.com/cheqd_io/status/1986111488105275396'},
+  {title:'Insights, Resources & News | Blockchain, SSI, Crypto & More | cheqd',link:'https://cheqd.io/blog/'},
+  {title:'Monetise Customer Credentials & Govern Trusted Data Ecosystems | cheqd',link:'https://cheqd.io/'},
+  {title:'Partnerships at cheqd | cheqd',link:'https://cheqd.io/blog/partnerships-at-cheqd/'},
+  {title:'cheqd’s 2022 Highlights | cheqd',link:'https://cheqd.io/blog/cheqds-2022-highlights/'},
+  {title:'We’re now cheqd! | cheqd',link:'https://cheqd.io/blog/we-are-now-cheqd/'},
+  {title:'cheqd News Archives | cheqd',link:'https://cheqd.io/blog/category/cheqd-news/'},
+  {title:'press release: cheqd raises $2.6 million to drive the uptake of digital IDs | cheqd',link:'https://cheqd.io/blog/cheqd-raises-2-6-million-to-drive-the-uptake-of-digital-ids/'},
+  {title:'cheqd and Dock Form Alliance to Accelerate Global Adoption of Decentralised ID | cheqd',link:'https://cheqd.io/blog/cheqd-and-dock-form-alliance-to-accelerate-global-adoption-of-decentralised-id/'},
+  {title:'Data Privacy Archives | cheqd',link:'https://cheqd.io/blog/tag/data-privacy/'},
+  {title:'Our Product Vision for 2024 at cheqd | cheqd',link:'https://cheqd.io/blog/our-product-vision-for-2024-at-cheqd/'},
+  {title:'$CHEQ $DOCK Token Merger Approved: An Alliance for Decentralised Identity Adoption | cheqd',link:'https://cheqd.io/blog/cheq-dock-token-merger-approved-an-alliance-for-decentralised-identity-adoption/'},
+  {title:'Entropy & Decentralisation: a cheq up | cheqd',link:'https://cheqd.io/blog/entropy-and-decentralisation-a-cheq-up/'},
+  {title:'Welcome to a new era for decentralised identity | cheqd',link:'https://cheqd.io/blog/welcome-to-a-new-era-for-decentralised-identity/'},
+  {title:'cheqd Mid-Year Update: Key Achievements and What\'s Ahead | cheqd',link:'https://cheqd.io/blog/cheqd-mid-year-update-key-achievements-and-whats-ahead/'},
+  {title:'A year in review | cheqd',link:'https://cheqd.io/blog/a-year-in-review/'},
+  {title:'Press Releases Archives | cheqd',link:'https://cheqd.io/insights/content/press-releases/'},
+  {title:'AnonCreds Indy-Pendence: Part Two | cheqd',link:'https://cheqd.io/blog/anoncreds-indy-pendence-part-two/'},
+  {title:'A Beginner\'s Guide to $CHEQ: The Foundation of the cheqd Ecosystem | cheqd',link:'https://cheqd.io/blog/a-beginners-guide-to-cheq-the-foundation-of-the-cheqd-ecosystem/'},
+  {title:'The new version of cheqd testnet is out — we’re gearing up for the mainnet launch | cheqd',link:'https://cheqd.io/blog/the-new-version-of-cheqd-testnet-is-out-were-gearing-up-for-the-mainnet-launch/'},
+  {title:'Our Product Vision for 2023 at cheqd | cheqd',link:'https://cheqd.io/blog/product-vision-for-2023/'},
+  {title:'#layers #trustregistries $cheq',link:'https://x.com/bigbagz30k/status/1985280115392311415'},
+  {title:'Happy to see @cheqd_io amongst this also for the need of decentralized identity via Decentralised Identifiers and Verifiable Credentials $cheq',link:'https://x.com/bigbagz30k/status/1985276645536854452'},
+  {title:'Should have used something like @cheqd_io and this wouldn\'t have happened',link:'https://x.com/Dagnum_PI/status/1985072597772677528'},
+  {title:'If I tell an agent with its own wallet to go buy me product, it’ll just buy the product and ship it to me. My data or account doesn’t even need to be involved in the transaction',link:'https://x.com/hishboy/status/1985017493212311563'},
+  {title:'again, Amazon has auth. Why do they need http protocol + another auth layer? Why would they commoditize their commerce layer and give up customer data/control?',link:'https://x.com/pcdkd/status/1985015935569174611'},
+  {title:'Very interesting list...for nr 4 you might want to check out @cheqd_io https://cheqd.io/solutions/use-cases/verifiable-ai/agentic-trust-solutions/',link:'https://x.com/fourstringfrett/status/1984327410012070078'},
+  {title:'Frauds stealing money',link:'https://x.com/Brandonmac14178/status/1984970866124345810'},
+  {title:'Frauds',link:'https://x.com/Brandonmac14178/status/1984970808565870733'},
+  {title:'Fix your coin. No data showing up on base. Are you stealing money?',link:'https://x.com/Brandonmac14178/status/1984970770238316803'},
+  {title:'Stealing investors money?? Not displaying price data on base!!',link:'https://x.com/Brandonmac14178/status/1984970671579902047'},
+  {title:'Your crap had been down for months. Base doesn’t display the price. Has been this way for too long. What is going on? Are you criminals stealing investors money?',link:'https://x.com/Brandonmac14178/status/1984970564641882533'},
+  {title:'We are focused on building here @cheqd_io 💪',link:'https://x.com/matt_arn/status/1985995439699836935'},
+  {title:'$CHEQ',link:'https://x.com/BaggensCheq/status/1985519536158949526'},
+  {title:'This is just worse tech stach than DIDs, VCs and trust registries that adhere to global standards. Which has already been developed and worked on. @cheqd_io $CHEQ https://cheqd.io/solutions/use-cases/verifiable-ai/agentic-trust-solutions/?utm_medium=social&utm_source=twitter',link:'https://x.com/BaggensCheq/status/1985519205387813242'}
 ];
 
-function render(data){
-  results.innerHTML = data.length ? data.map(i=>`<div class="card"><h3>${i.type}</h3><p>${i.title}</p><a href="${i.link}" target="_blank" rel="noopener">Read →</a></div>`).join('') : '<p class="loading">No matches.</p>';
-}
+// Auto-type
+all = all.map(i => {
+  if (i.link.includes('cheqd.io')) i.type = 'Blog Post';
+  else if (i.link.includes('x.com') || i.link.includes('twitter.com')) i.type = 'X Post';
+  else i.type = 'Featured Post';
+  return i;
+});
 
-render(all);
+const categories = ['X Post','Blog Post','Featured Post'];
+const results = document.getElementById('results');
+const search = document.getElementById('search');
+
+function render(filtered = all) {
+  results.innerHTML = '';
+  categories.forEach(cat => {
+    const items = filtered.filter(i => i.type === cat);
+    if (!items.length) return;
+    const div = document.createElement('div');
+    div.className = 'section';
+    div.innerHTML = `
+      <div class="section-header">
+        <h3>${cat} (${items.length})</h3>
+        <span class="arrow">></span>
+      </div>
+      <div class="cards">
+        ${items.map(i=>`<div class="card"><h4>${i.title}</h4><a href="${i.link}" target="_blank" rel="noopener">Read →</a></div>`).join('')}
+      </div>`;
+    results.appendChild(div);
+    div.querySelector('.section-header').onclick = () => {
+      div.querySelector('.cards').classList.toggle('open');
+      div.querySelector('.arrow').classList.toggle('open');
+    };
+  });
+}
+render();
+
 search.addEventListener('input', () => {
   const q = search.value.toLowerCase();
-  render(all.filter(i => i.title.toLowerCase().includes(q)));
+  const filtered = q ? all.filter(i => i.title.toLowerCase().includes(q)) : all;
+  render(filtered);
 });
 </script>
 </body>
