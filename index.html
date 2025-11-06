@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cheqd Info Directory</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#000;color:#fff;overflow-x:hidden;position:relative}
+canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1}
+header{padding:2rem;text-align:center;position:relative}
+.logo{position:absolute;top:1rem;left:1rem;height:50px}
+h1{font-size:2.5rem;background:linear-gradient(90deg,#ff6b00,#ffb800);background-clip:text;-webkit-background-clip:text;color:transparent}
+.note{font-size:0.9rem;color:#aaa;margin:0.5rem 0 1rem}
+input{margin:1rem auto;display:block;width:90%;max-width:500px;padding:1rem;border-radius:12px;border:none;background:rgba(255,255,255,0.1);backdrop-filter:blur(12px);color:#fff;font-size:1rem}
+input::placeholder{color:#aaa}
+.container{max-width:1200px;margin:auto;padding:0 1rem;display:grid;gap:1.5rem;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.card{background:rgba(255,255,255,0.08);backdrop-filter:blur(12px);border-radius:16px;padding:1.5rem;border:1px solid rgba(255,107,0,0.3);box-shadow:0 4px 20px rgba(255,107,0,0.1);transition:transform .2s}
+.card:hover{transform:translateY(-4px)}
+.card h3{color:#ffb800;margin-bottom:.5rem}
+.card a{color:#ff6b00;text-decoration:none}
+.card a:hover{text-decoration:underline}
+footer{position:fixed;bottom:1rem;left:1rem;color:#666;font-size:0.8rem}
+@media (prefers-color-scheme:light){body{background:#111;color:#eee}}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<header>
+<img src="logo.png" alt="Custom Logo" class="logo">
+<h1>Cheqd Info Directory</h1>
+<p class="note">Type keywords like "AI Agents" to find related cheqd news, posts, and updates.</p>
+<input type="search" id="search" placeholder="Search cheqd, partners, $CHEQ...">
+</header>
+<div class="container" id="results"></div>
+<footer>Made by @oClockyy</footer>
+
+<script>
+// Canvas: fading hexagons + stars
+const canvas=document.getElementById('bg'),ctx=canvas.getContext('2d');
+let w,h,hex=[],dots=[];
+function resize(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight}
+resize();window.addEventListener('resize',resize);
+
+class Hex{constructor(){this.reset()}
+reset(){this.x=Math.random()*w;this.y=Math.random()*h;this.size=20+Math.random()*40;this.speed=0.2+Math.random()*0.3;this.alpha=0;this.fade=Math.random()>0.5?1:-1}}
+update(){this.y+=this.speed;this.alpha+=this.fade*0.005;if(this.alpha<=0||this.alpha>=0.6)this.fade=-this.fade;if(this.y>h)this.reset()}
+draw(){ctx.beginPath();for(let i=0;i<6;i++){let a=i*60*Math.PI/180;ctx.lineTo(this.x+this.size*Math.cos(a),this.y+this.size*Math.sin(a))}ctx.closePath();ctx.fillStyle=`rgba(255,107,0,${this.alpha})`;ctx.fill()}}
+
+class Dot{constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.size=1+Math.random()*2;this.alpha=0;this.fade=1}
+update(){this.alpha+=this.fade*0.01;if(this.alpha<=0||this.alpha>=0.8)this.fade=-this.fade}
+draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fillStyle=`rgba(255,184,0,${this.alpha})`;ctx.fill()}}
+
+for(let i=0;i<30;i++)hex.push(new Hex());
+for(let i=0;i<80;i++)dots.push(new Dot());
+
+function animate(){
+ctx.clearRect(0,0,w,h);
+hex.forEach(h=>{h.update();h.draw()});
+dots.forEach(d=>{d.update();d.draw()});
+requestAnimationFrame(animate);
+}animate();
+
+// Data fetch
+const results=document.getElementById('results'),search=document.getElementById('search');
+let all=[];
+
+async function load(){
+  try{
+    const x=await fetch('https://nitter.net/cheqd_io/rss').then(r=>r.text());
+    const xposts=new DOMParser().parseFromString(x,'text/xml').querySelectorAll('item');
+    xposts.forEach(p=>{
+      all.push({type:'X Post',title:p.querySelector('title').textContent,link:p.querySelector('link').textContent,date:p.querySelector('pubDate').textContent})
+    });
+
+    const blog=await fetch('https://cheqd.io/blog/').then(r=>r.text());
+    const parser=new DOMParser().parseFromString(blog,'text/html');
+    parser.querySelectorAll('article').forEach(a=>{
+      const link=a.querySelector('a');
+      const title=a.querySelector('h2')||a.querySelector('h3');
+      if(link&&title)all.push({type:'Blog',title:title.textContent.trim(),link:link.href})
+    });
+
+    render(all);
+  }catch(e){console.error(e);render([])}
+}
+
+function render(data){
+  results.innerHTML=data.map(i=>`
+    <div class="card">
+      <h3>${i.type}</h3>
+      <p>${i.title}</p>
+      <a href="${i.link}" target="_blank">Read →</a>
+    </div>`).join('');
+}
+
+search.addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase();
+  const filtered=all.filter(i=>i.title.toLowerCase().includes(q));
+  render(filtered);
+});
+
+load();
+</script>
+</body>
+</html>
