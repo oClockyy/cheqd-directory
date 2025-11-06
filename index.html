@@ -22,7 +22,8 @@ input::placeholder{color:#aaa}
 .card a{color:#ff6b00;text-decoration:none}
 .card a:hover{text-decoration:underline}
 footer{position:fixed;bottom:1rem;left:1rem;color:#666;font-size:0.8rem}
-@media (prefers-color-scheme:light){body{background:#111;color:#eee}}
+.loading{text-align:center;color:#aaa;margin:2rem}
+.error{color:#ff6b00}
 </style>
 </head>
 <body>
@@ -30,76 +31,62 @@ footer{position:fixed;bottom:1rem;left:1rem;color:#666;font-size:0.8rem}
 <header>
 <img src="logo.png" alt="Custom Logo" class="logo">
 <h1>Cheqd Info Directory</h1>
-<p class="note">Type keywords like "AI Agents" to find related cheqd news, posts, and updates.</p>
+<p class="note">Type keywords like "AI Agents" to find cheqd news, posts, and updates instantly.</p>
 <input type="search" id="search" placeholder="Search cheqd, partners, $CHEQ...">
 </header>
-<div class="container" id="results"></div>
+<div class="container" id="results"><p class="loading">Loading cheqd data...</p></div>
 <footer>Made by @oClockyy</footer>
 
 <script>
-// Canvas: fading hexagons + stars
+// Canvas: hexagons + stars
 const canvas=document.getElementById('bg'),ctx=canvas.getContext('2d');
 let w,h,hex=[],dots=[];
 function resize(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight}
 resize();window.addEventListener('resize',resize);
-
-class Hex{constructor(){this.reset()}
-reset(){this.x=Math.random()*w;this.y=Math.random()*h;this.size=20+Math.random()*40;this.speed=0.2+Math.random()*0.3;this.alpha=0;this.fade=Math.random()>0.5?1:-1}}
-update(){this.y+=this.speed;this.alpha+=this.fade*0.005;if(this.alpha<=0||this.alpha>=0.6)this.fade=-this.fade;if(this.y>h)this.reset()}
-draw(){ctx.beginPath();for(let i=0;i<6;i++){let a=i*60*Math.PI/180;ctx.lineTo(this.x+this.size*Math.cos(a),this.y+this.size*Math.sin(a))}ctx.closePath();ctx.fillStyle=`rgba(255,107,0,${this.alpha})`;ctx.fill()}}
-
-class Dot{constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.size=1+Math.random()*2;this.alpha=0;this.fade=1}
-update(){this.alpha+=this.fade*0.01;if(this.alpha<=0||this.alpha>=0.8)this.fade=-this.fade}
-draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fillStyle=`rgba(255,184,0,${this.alpha})`;ctx.fill()}}
-
+class Hex{constructor(){this.reset()}reset(){this.x=Math.random()*w;this.y=Math.random()*h;this.size=20+Math.random()*40;this.speed=0.2+Math.random()*0.3;this.alpha=0;this.fade=Math.random()>0.5?1:-1}update(){this.y+=this.speed;this.alpha+=this.fade*0.005;if(this.alpha<=0||this.alpha>=0.6)this.fade=-this.fade;if(this.y>h)this.reset()}draw(){ctx.beginPath();for(let i=0;i<6;i++){let a=i*60*Math.PI/180;ctx.lineTo(this.x+this.size*Math.cos(a),this.y+this.size*Math.sin(a))}ctx.closePath();ctx.fillStyle=`rgba(255,107,0,${this.alpha})`;ctx.fill()}}
+class Dot{constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.size=1+Math.random()*2;this.alpha=0;this.fade=1}update(){this.alpha+=this.fade*0.01;if(this.alpha<=0||this.alpha>=0.8)this.fade=-this.fade}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fillStyle=`rgba(255,184,0,${this.alpha})`;ctx.fill()}}
 for(let i=0;i<30;i++)hex.push(new Hex());
 for(let i=0;i<80;i++)dots.push(new Dot());
+function animate(){ctx.clearRect(0,0,w,h);hex.forEach(h=>{h.update();h.draw()});dots.forEach(d=>{d.update();d.draw()});requestAnimationFrame(animate)}animate();
 
-function animate(){
-ctx.clearRect(0,0,w,h);
-hex.forEach(h=>{h.update();h.draw()});
-dots.forEach(d=>{d.update();d.draw()});
-requestAnimationFrame(animate);
-}animate();
-
-// Data fetch
+// Data
 const results=document.getElementById('results'),search=document.getElementById('search');
 let all=[];
 
+// Fetch via CORS proxy
+const proxy='https://api.allorigins.win/raw?url=';
+
 async function load(){
   try{
-    const x=await fetch('https://nitter.net/cheqd_io/rss').then(r=>r.text());
-    const xposts=new DOMParser().parseFromString(x,'text/xml').querySelectorAll('item');
-    xposts.forEach(p=>{
-      all.push({type:'X Post',title:p.querySelector('title').textContent,link:p.querySelector('link').textContent,date:p.querySelector('pubDate').textContent})
+    // cheqd blog RSS
+    const rss=await fetch(proxy+encodeURIComponent('https://cheqd.io/blog/rss.xml')).then(r=>r.text());
+    const xml=new DOMParser().parseFromString(rss,'text/xml');
+    xml.querySelectorAll('item').forEach(i=>{
+      const title=i.querySelector('title')?.textContent||'';
+      const link=i.querySelector('link')?.textContent||'#';
+      if(title)all.push({type:'Blog',title,link});
     });
 
-    const blog=await fetch('https://cheqd.io/blog/').then(r=>r.text());
-    const parser=new DOMParser().parseFromString(blog,'text/html');
-    parser.querySelectorAll('article').forEach(a=>{
-      const link=a.querySelector('a');
-      const title=a.querySelector('h2')||a.querySelector('h3');
-      if(link&&title)all.push({type:'Blog',title:title.textContent.trim(),link:link.href})
+    // X posts via nitter RSS
+    const xrss=await fetch(proxy+encodeURIComponent('https://nitter.net/cheqd_io/rss')).then(r=>r.text());
+    const xxml=new DOMParser().parseFromString(xrss,'text/xml');
+    xxml.querySelectorAll('item').forEach(i=>{
+      const title=i.querySelector('title')?.textContent||'';
+      const link=i.querySelector('link')?.textContent||'#';
+      if(title)all.push({type:'X Post',title,link});
     });
 
     render(all);
-  }catch(e){console.error(e);render([])}
+  }catch(e){
+    results.innerHTML='<p class="loading error">Failed to load. Check internet.</p>';
+  }
 }
 
 function render(data){
-  results.innerHTML=data.map(i=>`
-    <div class="card">
-      <h3>${i.type}</h3>
-      <p>${i.title}</p>
-      <a href="${i.link}" target="_blank">Read →</a>
-    </div>`).join('');
+  results.innerHTML=data.map(i=>`<div class="card"><h3>${i.type}</h3><p>${i.title}</p><a href="${i.link}" target="_blank" rel="noopener">Read →</a></div>`).join('')||'<p class="loading">No matches.</p>';
 }
 
-search.addEventListener('input',e=>{
-  const q=e.target.value.toLowerCase();
-  const filtered=all.filter(i=>i.title.toLowerCase().includes(q));
-  render(filtered);
-});
+search.addEventListener('input',()=>{const q=search.value.toLowerCase();render(all.filter(i=>i.title.toLowerCase().includes(q)))});
 
 load();
 </script>
